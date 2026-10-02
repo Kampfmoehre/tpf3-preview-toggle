@@ -1,0 +1,16 @@
+{
+    "en": {
+        "3D preview": "3D preview",
+        "3D preview at game start": "3D preview at game start",
+        "preview_default_tooltip": "Whether the live 3D preview in vehicle windows is switched on when the game is loaded.",
+        "Off": "Off",
+        "On": "On"
+    },
+    "de": {
+        "3D preview": "3D-Vorschau",
+        "3D preview at game start": "3D-Vorschau beim Spielstart",
+        "preview_default_tooltip": "Legt fest, ob die Live-3D-Vorschau in Fahrzeugfenstern beim Laden des Spiels eingeschaltet ist.",
+        "Off": "Aus",
+        "On": "An"
+    }
+}

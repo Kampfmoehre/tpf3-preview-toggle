@@ -1,0 +1,32 @@
+{
+    "cosmetic": true,
+    "dependencies": null,
+    "incompatibilities": null,
+    "modId": "kampfmoehre_preview_toggle_1",
+    "options": null,
+    "params": [
+        {
+            "defaultIndex": 1,
+            "key": "previewDefault",
+            "name": "3D preview at game start",
+            "tooltip": "preview_default_tooltip",
+            "uiType": "Button",
+            "values": [
+                "Off",
+                "On"
+            ]
+        }
+    ],
+    "postRunScript": {
+        "fileName": ""
+    },
+    "preRunScript": {
+        "fileName": ""
+    },
+    "revision": 2,
+    "runScript": {
+        "fileName": ""
+    },
+    "severityAdd": "None",
+    "severityRemove": "None"
+}
