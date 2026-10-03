@@ -23,7 +23,7 @@
 -- .script.lua files must export via function data().
 
 function data()
-	local VERSION = "0.3.2"
+	local VERSION = "0.3.3"
 
 	local react = ug_require "::/gui/main/react.lua"
 	local builtin = ug_require "::/gui/main/builtin.lua"
@@ -37,6 +37,14 @@ function data()
 	-- Node ids from the current render pass, used to find the preview's layout.
 	local lastPreviewNode = nil
 	local lastPreviewChild = nil
+
+	-- Builtins may be called as builtin.X{params} or builtin.X(react.ref(r), {params})
+	-- (see react.lua splitParams); the params table is always the last argument.
+	local function lastArg(...)
+		local n = select("#", ...)
+		if n == 0 then return nil end
+		return (select(n, ...))
+	end
 
 	local function isVehicle(entity)
 		if entity == nil then
@@ -52,7 +60,8 @@ function data()
 		local origLayout = builtin.FloatingLayout
 		builtin._kampfmoehrePreviewToggleOrig = origRenderer
 
-		builtin.EntityRendererComponent = function(params)
+		builtin.EntityRendererComponent = function(...)
+			local params = lastArg(...)
 			if type(params) == "table" and isVehicle(params.entity) then
 				-- We are inside the hosting recipe (vehicle.tl) here, so react hooks
 				-- are legal and run once per render in a stable order: a state to
@@ -64,7 +73,7 @@ function data()
 
 				local node
 				if previewEnabled then
-					node = origRenderer(params)
+					node = origRenderer(...)
 				else
 					node = builtin.Component{
 						meta = { class = "satan-preview-off" },
@@ -74,11 +83,12 @@ function data()
 				lastPreviewNode = node
 				return node
 			end
-			return origRenderer(params)
+			return origRenderer(...)
 		end
 
-		builtin.FloatingLayoutChild = function(params)
-			local node = origChild(params)
+		builtin.FloatingLayoutChild = function(...)
+			local params = lastArg(...)
+			local node = origChild(...)
 			if type(params) == "table" and lastPreviewNode ~= nil and params.item == lastPreviewNode then
 				lastPreviewChild = node
 				lastPreviewNode = nil
@@ -86,7 +96,8 @@ function data()
 			return node
 		end
 
-		builtin.FloatingLayout = function(params)
+		builtin.FloatingLayout = function(...)
+			local params = lastArg(...)
 			if type(params) == "table" and lastPreviewChild ~= nil and type(params.children) == "table" then
 				for _, child in ipairs(params.children) do
 					if child == lastPreviewChild then
@@ -98,7 +109,7 @@ function data()
 					end
 				end
 			end
-			return origLayout(params)
+			return origLayout(...)
 		end
 
 		log.message("[preview_toggle] v" .. VERSION .. " builtin wrappers installed")
