@@ -23,7 +23,7 @@
 -- .script.lua files must export via function data().
 
 function data()
-	local VERSION = "0.3.3"
+	local VERSION = "0.4.0"
 
 	local react = ug_require "::/gui/main/react.lua"
 	local builtin = ug_require "::/gui/main/builtin.lua"
@@ -46,12 +46,16 @@ function data()
 		return (select(n, ...))
 	end
 
+	-- Windows whose preview is toggled: transport vehicles and persons (whose
+	-- window shows their private car while they drive).
 	local function isVehicle(entity)
 		if entity == nil then
 			return false
 		end
 		local ok, tv = pcall(api.engine.getComponent, entity, api.type.ComponentType.TRANSPORT_VEHICLE)
-		return ok and tv ~= nil
+		if ok and tv ~= nil then return true end
+		local okP, sp = pcall(api.engine.getComponent, entity, api.type.ComponentType.SIM_PERSON)
+		return okP and sp ~= nil
 	end
 
 	if not builtin._kampfmoehrePreviewToggleOrig then
@@ -146,9 +150,7 @@ function data()
 	-- Checkbox row shown in every vehicle window (VehicleEowExtensionPoint).
 	-- RegisterPluginRecipe only needs the extension point's id (and no
 	-- wrappedRecipe); discovery happens through the resource type string.
-	preview_toggle.TogglePlugin = react.RegisterPluginRecipe(
-		{ id = "::VehicleEowExtensionPoint" }, "KampfmoehrePreviewTogglePlugin",
-		function(_params)
+	local function togglePluginFn(_params)
 			-- Re-render this row when the toggle changes in ANY vehicle window, and
 			-- drive the checkbox from the shared state (controlled "value"), so all
 			-- open windows show the same state.
@@ -172,7 +174,12 @@ function data()
 				orientation = builtin.type.Orientation.Horizontal,
 				children = children,
 			}
-		end)
+	end
+
+	preview_toggle.TogglePlugin = react.RegisterPluginRecipe(
+		{ id = "::VehicleEowExtensionPoint" }, "KampfmoehrePreviewTogglePlugin", togglePluginFn)
+	preview_toggle.PersonTogglePlugin = react.RegisterPluginRecipe(
+		{ id = "::SimPersonEowExtensionPoint" }, "KampfmoehrePreviewTogglePersonPlugin", togglePluginFn)
 
 	return preview_toggle
 end

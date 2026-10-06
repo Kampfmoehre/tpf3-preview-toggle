@@ -5,7 +5,7 @@
             "role": "CREATOR"
         }
     ],
-    "description": "Adds a '3D preview' checkbox to vehicle windows. Unchecking it removes the live 3D camera preview from all vehicle windows; the camera button and speed display stay.\n\nUseful where an open vehicle preview costs a lot of performance.\n\nThe initial state can be set per savegame in the mod settings.",
+    "description": "Adds a '3D preview' checkbox to vehicle windows and to person windows (which show the person's private car). Unchecking it removes the live 3D camera preview from all vehicle windows; the camera button and speed display stay.\n\nUseful where an open vehicle preview costs a lot of performance.\n\nThe initial state can be set per savegame in the mod settings.",
     "name": "Vehicle 3D Preview Toggle",
     "summary": "Checkbox to switch off the 3D preview in vehicle windows",
     "tags": [
@@ -14,7 +14,7 @@
     "url": "",
     "localization": {
         "de": {
-            "description": "Fügt Fahrzeugfenstern einen Haken „3D-Vorschau“ hinzu. Damit lässt sich die Live-Kameravorschau in allen Fahrzeugfenstern deaktivieren, Kamera-Knopf und Geschwindigkeitsanzeige bleiben erhalten.\n\nHilfreich, wenn eine offene Fahrzeugvorschau viel Leistung kostet.",
+            "description": "Fügt Fahrzeugfenstern und Personenfenstern (die den Privat-PKW der Person zeigen) einen Haken „3D-Vorschau“ hinzu. Damit lässt sich die Live-Kameravorschau in allen Fahrzeugfenstern deaktivieren, Kamera-Knopf und Geschwindigkeitsanzeige bleiben erhalten.\n\nHilfreich, wenn eine offene Fahrzeugvorschau viel Leistung kostet.",
             "name": "Fahrzeug-3D-Vorschau abschaltbar",
             "summary": "Haken zum Abschalten der 3D-Vorschau in Fahrzeugfenstern"
         }
