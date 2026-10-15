@@ -41,6 +41,10 @@ React-like component system. Mods can hook into it through
   vehicles it returns an empty placeholder while the preview is off, so no
   preview camera is created at all. It also re-keys the enclosing
   `FloatingLayout` so the overlay widgets get fresh geometry when toggling.
+  While the preview is off, that layout is replaced by two stacked rows:
+  top-anchored overlays (specialisations, modifiers such as a landmark's
+  pollution bonus) first, the cockpit button and speed below, so they no
+  longer overlap in a zero-height strip.
 - `toggle.res.lua` registers the checkbox as a plugin at the
   `VehicleEowExtensionPoint`, i.e. it is rendered like the game's own
   vehicle window widgets.
@@ -60,6 +64,7 @@ kampfmoehre_preview_toggle_1/      the mod (this is what gets published)
     entry.res.lua                  plugin registration (entry point)
     toggle.res.lua                 plugin registration (vehicle window)
     preview_toggle.script.lua      the actual code
+    preview_toggle.css.lua         style for the overlay rows (preview off)
 sync.sh                            copies the mod into the game's staging area
 ```
 

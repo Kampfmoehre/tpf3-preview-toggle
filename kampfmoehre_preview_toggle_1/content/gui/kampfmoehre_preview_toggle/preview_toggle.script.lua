@@ -7,8 +7,11 @@
 -- wraps builtin.EntityRendererComponent: for vehicles it returns an empty
 -- placeholder while the preview is switched off, so no preview camera is
 -- created at all. A checkbox plugin in the vehicle window toggles the state
--- for all vehicle windows at once. The overlay widgets (cockpit button, speed)
--- stay visible as a thin strip above the placeholder.
+-- for all vehicle windows at once. The overlay widgets stay visible as a thin
+-- strip: top-anchored ones (specialisations, modifiers such as -20 % pollution)
+-- in a first row, bottom-anchored ones (cockpit button, speed) in a second row
+-- below, so they no longer overlap the way they would in one zero-height
+-- FloatingLayout.
 --
 -- The preview sits in a FloatingLayout together with overlay widgets (cockpit
 -- button, speed, specialisation icons). Swapping only the preview node left
@@ -16,6 +19,9 @@
 -- below also tag the FloatingLayoutChild holding the preview and give the
 -- enclosing FloatingLayout a localKey that changes with the toggle state. A
 -- changed localKey makes react recreate the layout node, i.e. fresh geometry.
+-- While the preview is off, the FloatingLayoutChild calls after the preview's
+-- child are only recorded (not created) and the FloatingLayout wrapper creates
+-- them in the two rows instead, so no node is created and then dropped.
 --
 -- Loaded via react-plugin resources (entry.res.lua, toggle.res.lua), so this
 -- runs inside the game's GUI Lua state. builtin.lua is cached per resolved
@@ -23,7 +29,7 @@
 -- .script.lua files must export via function data().
 
 function data()
-	local VERSION = "0.4.0"
+	local VERSION = "0.5.0"
 
 	local react = ug_require "::/gui/main/react.lua"
 	local builtin = ug_require "::/gui/main/builtin.lua"
@@ -90,30 +96,89 @@ function data()
 			return origRenderer(...)
 		end
 
+		-- Overlay children recorded while the preview is off (see header).
+		local pendingMarker = {}
+		local collecting = false
+
+		local function isPending(child)
+			return type(child) == "table" and child[pendingMarker] ~= nil
+		end
+
+		local function createPending(child)
+			local args = child[pendingMarker]
+			return origChild((table.unpack or unpack)(args, 1, args.n))
+		end
+
 		builtin.FloatingLayoutChild = function(...)
 			local params = lastArg(...)
-			local node = origChild(...)
 			if type(params) == "table" and lastPreviewNode ~= nil and params.item == lastPreviewNode then
+				local node = origChild(...)
 				lastPreviewChild = node
 				lastPreviewNode = nil
+				collecting = not previewEnabled
+				return node
 			end
-			return node
+			if collecting and type(params) == "table" then
+				return { [pendingMarker] = { n = select("#", ...), ... } }
+			end
+			return origChild(...)
 		end
 
 		builtin.FloatingLayout = function(...)
 			local params = lastArg(...)
-			if type(params) == "table" and lastPreviewChild ~= nil and type(params.children) == "table" then
-				for _, child in ipairs(params.children) do
-					if child == lastPreviewChild then
-						lastPreviewChild = nil
-						local meta = params.meta or {}
-						meta.localKey = previewEnabled and "satan-preview-on" or "satan-preview-off"
-						params.meta = meta
-						break
-					end
+			if type(params) ~= "table" or type(params.children) ~= "table" then
+				return origLayout(...)
+			end
+			local hasPreview = false
+			for __, child in ipairs(params.children) do
+				if child == lastPreviewChild then
+					hasPreview = true
+					break
 				end
 			end
-			return origLayout(...)
+			if not hasPreview then
+				-- Not the preview's layout (e.g. one nested in an overlay item):
+				-- create any recorded children in place.
+				for i, child in ipairs(params.children) do
+					if isPending(child) then
+						params.children[i] = createPending(child)
+					end
+				end
+				return origLayout(...)
+			end
+
+			lastPreviewChild = nil
+			collecting = false
+			local meta = params.meta or {}
+			meta.localKey = previewEnabled and "satan-preview-on" or "satan-preview-off"
+			params.meta = meta
+			if previewEnabled then
+				return origLayout(...)
+			end
+
+			-- Preview off: bottom-anchored overlays (v == 1) get their own row
+			-- below the rest.
+			local top, bottom = {}, {}
+			for __, child in ipairs(params.children) do
+				if isPending(child) then
+					local childParams = lastArg((table.unpack or unpack)(child[pendingMarker], 1, child[pendingMarker].n))
+					local row = (type(childParams) == "table" and childParams.v == 1) and bottom or top
+					row[#row + 1] = createPending(child)
+				else
+					top[#top + 1] = child
+				end
+			end
+			local rows = {
+				origLayout{ meta = { class = "kampfmoehre-preview-strip" }, children = top },
+			}
+			if #bottom > 0 then
+				rows[#rows + 1] = origLayout{ meta = { class = "kampfmoehre-preview-strip" }, children = bottom }
+			end
+			return builtin.BoxLayout{
+				meta = { class = "kampfmoehre-preview-strip", localKey = meta.localKey },
+				orientation = builtin.type.Orientation.Vertical,
+				children = rows,
+			}
 		end
 
 		log.message("[preview_toggle] v" .. VERSION .. " builtin wrappers installed")
