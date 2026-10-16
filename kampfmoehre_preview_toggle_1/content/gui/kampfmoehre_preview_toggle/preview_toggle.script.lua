@@ -29,7 +29,7 @@
 -- .script.lua files must export via function data().
 
 function data()
-	local VERSION = "0.5.0"
+	local VERSION = "0.5.1"
 
 	local react = ug_require "::/gui/main/react.lua"
 	local builtin = ug_require "::/gui/main/builtin.lua"
@@ -181,7 +181,7 @@ function data()
 			}
 		end
 
-		log.message("[preview_toggle] v" .. VERSION .. " builtin wrappers installed")
+		log.message("[kampfmoehre_preview_toggle] v" .. VERSION .. " builtin wrappers installed")
 	end
 
 	local preview_toggle = {}
@@ -197,7 +197,7 @@ function data()
 		local mine = all["kampfmoehre_preview_toggle_1"]
 		if type(mine) == "table" and mine.previewDefault ~= nil then
 			previewEnabled = (mine.previewDefault == 2)
-			log.message("[preview_toggle] default from mod params: preview " .. (previewEnabled and "on" or "off"))
+			log.message("[kampfmoehre_preview_toggle] default from mod params: preview " .. (previewEnabled and "on" or "off"))
 		end
 	end
 
@@ -230,7 +230,7 @@ function data()
 					value = previewEnabled and 1 or 0,
 					onValueChange = function(value)
 						previewEnabled = (value == 1)
-						log.message("[preview_toggle] preview " .. (previewEnabled and "on" or "off"))
+						log.message("[kampfmoehre_preview_toggle] preview " .. (previewEnabled and "on" or "off"))
 						api.gui.fireReactEvent(EVENT, {})
 					end,
 				},

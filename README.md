@@ -77,7 +77,7 @@ Workflow (Linux):
    the savegame is enough to pick up changes, no restart needed.
 3. Lua errors show up as a red error screen in the game ("Copy to clipboard")
    and in `.../3493540/local/crash_dump/stdout.txt`. The script logs with the
-   prefix `[preview_toggle]`.
+   prefix `[kampfmoehre_preview_toggle]`.
 4. Before uploading a new version through the in-game Mod-Hub, increase
    `revision` in `mod.json`. mod.io rejects a package whose content is
    byte-identical to an already uploaded one.
