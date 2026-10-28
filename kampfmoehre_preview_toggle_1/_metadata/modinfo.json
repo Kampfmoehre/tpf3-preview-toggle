@@ -5,18 +5,18 @@
             "role": "CREATOR"
         }
     ],
-    "description": "Adds a '3D preview' checkbox to vehicle windows and to person windows (which show the person's private car). Unchecking it removes the live 3D camera preview from all vehicle windows; the camera button and speed display stay.\n\nUseful where an open vehicle preview costs a lot of performance.\n\nThe initial state can be set per savegame in the mod settings.",
-    "name": "Vehicle 3D Preview Toggle",
-    "summary": "Checkbox to switch off the 3D preview in vehicle windows",
+    "description": "<p>Adds a '3D preview' checkbox to some windowsthat show 3D preview of the objects, like vehicles. Unchecking it removes the live 3D camera preview from all these windows. In vehicle windows, the camera button and speed display stays.</p><p>Useful when the open preview costs a lot of performance.</p><p>Via mod settings you can set the default state. Pure UI change, achievements stay enabled and you can safely remove it from any save game.</p><p>This mod was created with the help of LLMs but all code was reviewed and tested by me.</p><p><strong>Changelog</strong></p><p><strong>0.6.0 (2026-10-28)</strong></p><ul><li>Landmark windows (and company headquarters) get the checkbox too and lose their 3D preview while it is off.</li><li>Renamed from \"Vehicle 3D Preview Toggle\" to \"3D Preview Toggle\".</li></ul><p><strong>0.5.0 (2026-10-15)</strong></p><ul><li>With the preview off, the overlays no longer overlap: modifiers and specialisations in a first row, cockpit button and speed in a second row below.</li></ul><p><strong>0.4.0 (2026-10-06)</strong></p><ul><li>Person windows (showing the person's private car) get the checkbox too.</li></ul><p><strong>0.3.3 (2026-10-03)</strong></p><ul><li>Fixed an error together with other mods that call the 3D preview with a reference argument.</li></ul><p><strong>0.3.2 (2026-10-02)</strong></p><ul><li>First release: \"3D preview\" checkbox in vehicle windows, initial state as mod setting.</li></ul>",
+    "name": "3D Preview Toggle",
+    "summary": "Checkbox to switch off the 3D preview in vehicle, person and landmark windows",
     "tags": [
         "Script Mod"
     ],
     "url": "",
     "localization": {
         "de": {
-            "description": "Fügt Fahrzeugfenstern und Personenfenstern (die den Privat-PKW der Person zeigen) einen Haken „3D-Vorschau“ hinzu. Damit lässt sich die Live-Kameravorschau in allen Fahrzeugfenstern deaktivieren, Kamera-Knopf und Geschwindigkeitsanzeige bleiben erhalten.\n\nHilfreich, wenn eine offene Fahrzeugvorschau viel Leistung kostet.",
-            "name": "Fahrzeug-3D-Vorschau abschaltbar",
-            "summary": "Haken zum Abschalten der 3D-Vorschau in Fahrzeugfenstern"
+            "description": "<p><strong>Deutsch</strong></p><p>Fügt Fenstern mit 3D-Vorschau einen Haken hinzu, mit dem sich die Vorschau deaktivieren lässt. In Fahrzeugfenstern bleiben Kamera-Knopf und Geschwindigkeitsanzeige erhalten.</p><p>Hilfreich, wenn eine offene Vorschau viel Leistung kostet.</p><p>Über die Mod-Einstellungen lässt sich der Standard Zustand einstellen. Reine UI-Änderung, Errungenschaften bleiben aktiv und die Mod kann gefahrlos aus Spielständen entfernt werden.</p><p>Diese Mod wurde mit Hilfe von LLMs erstellt, aber der gesamte Code wurde von mir geprüft und getestet.</p>",
+            "name": "3D-Vorschau abschaltbar",
+            "summary": "Haken zum Abschalten der 3D-Vorschau in Fahrzeug-, Personen- und Wahrzeichenfenstern"
         }
     }
 }

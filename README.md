@@ -1,8 +1,9 @@
-# Vehicle 3D Preview Toggle (Transport Fever 3)
+# 3D Preview Toggle (Transport Fever 3)
 
 A small UI mod for Transport Fever 3 that adds a **"3D preview" checkbox to
-vehicle windows**. Unchecking it removes the live 3D camera preview from all
-vehicle windows; the camera button and the speed display stay in place.
+vehicle, person and landmark windows**. Unchecking it removes the live 3D
+camera preview from all these windows; in vehicle windows the camera button
+and the speed display stay in place. (Formerly "Vehicle 3D Preview Toggle".)
 
 Why: an open vehicle preview can cost a lot of performance. On my machine (Linux/Vulkan) it
 roughly halved the frame rate as long as the window is open (GPU load drops
@@ -10,7 +11,7 @@ from ~99 % to ~70 %, see the
 [forum report](https://forum.urbangames.com/forum/index.php?thread/3958-verringerte-performance-mit-fahrzeugfenster/)).
 With the preview switched off the frame rate goes back to normal.
 
-- The checkbox state is shared by all vehicle windows and lasts for the
+- The checkbox state is shared by all these windows and lasts for the
   session.
 - The initial state ("3D preview at game start", Off/On) can be chosen per
   savegame in the mod settings when loading a game.
@@ -38,16 +39,20 @@ React-like component system. Mods can hook into it through
   which loads `preview_toggle.script.lua` into the GUI Lua state as soon as
   the game UI is built.
 - The script wraps `builtin.EntityRendererComponent` (the live preview). For
-  vehicles it returns an empty placeholder while the preview is off, so no
+  vehicles, persons and landmarks it returns an empty placeholder while the preview is off, so no
   preview camera is created at all. It also re-keys the enclosing
   `FloatingLayout` so the overlay widgets get fresh geometry when toggling.
   While the preview is off, that layout is replaced by two stacked rows:
   top-anchored overlays (specialisations, modifiers such as a landmark's
   pollution bonus) first, the cockpit button and speed below, so they no
   longer overlap in a zero-height strip.
-- `toggle.res.lua` registers the checkbox as a plugin at the
-  `VehicleEowExtensionPoint`, i.e. it is rendered like the game's own
-  vehicle window widgets.
+  Landmark windows (`PerkWindowContent`, also used for company headquarters)
+  are recognised by the recipe that calls the renderer; there the preview
+  simply disappears.
+- `toggle.res.lua`, `toggle_person.res.lua` and `toggle_perk.res.lua`
+  register the checkbox as a plugin at the `VehicleEowExtensionPoint`,
+  `SimPersonEowExtensionPoint` and `PerkEowExtensionPoint`, i.e. it is
+  rendered like the game's own entity window widgets.
 - The mod parameter is declared in `mod.json` and read with
   `api.engine.config.getModParams()` (values are 1-based).
 - `strings.json` holds the translations.
@@ -63,9 +68,13 @@ kampfmoehre_preview_toggle_1/      the mod (this is what gets published)
   content/gui/kampfmoehre_preview_toggle/
     entry.res.lua                  plugin registration (entry point)
     toggle.res.lua                 plugin registration (vehicle window)
+    toggle_person.res.lua          plugin registration (person window)
+    toggle_perk.res.lua            plugin registration (landmark window)
     preview_toggle.script.lua      the actual code
     preview_toggle.css.lua         style for the overlay rows (preview off)
 sync.sh                            copies the mod into the game's staging area
+CHANGELOG.md                       rendered into the EN description with
+                                   python3 -I ../changelog_to_modinfo.py . kampfmoehre_preview_toggle_1
 ```
 
 Workflow (Linux):
