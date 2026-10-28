@@ -1,17 +1,19 @@
--- Vehicle 3D preview toggle for Transport Fever 3.
+-- 3D preview toggle for Transport Fever 3.
 --
 -- The live camera preview at the top of a vehicle window is a
 -- builtin.EntityRendererComponent (base gui/entity_window/vehicle/vehicle.tl).
 -- On Linux/Vulkan an open preview roughly halves the frame rate (GPU load drops
 -- from ~99% to ~70%, looks like a per-frame CPU<->GPU sync stall). This mod
--- wraps builtin.EntityRendererComponent: for vehicles it returns an empty
--- placeholder while the preview is switched off, so no preview camera is
--- created at all. A checkbox plugin in the vehicle window toggles the state
--- for all vehicle windows at once. The overlay widgets stay visible as a thin
--- strip: top-anchored ones (specialisations, modifiers such as -20 % pollution)
--- in a first row, bottom-anchored ones (cockpit button, speed) in a second row
--- below, so they no longer overlap the way they would in one zero-height
--- FloatingLayout.
+-- wraps builtin.EntityRendererComponent: for vehicles, persons and landmarks
+-- (base gui/entity_window/perk/perk.tl, also used for company headquarters)
+-- it returns an empty placeholder while the preview is switched off, so no
+-- preview camera is created at all. A checkbox plugin in these windows toggles
+-- the state for all of them at once. In vehicle windows the overlay widgets
+-- stay visible as a thin strip: top-anchored ones (specialisations, modifiers
+-- such as -20 % pollution) in a first row, bottom-anchored ones (cockpit
+-- button, speed) in a second row below, so they no longer overlap the way they
+-- would in one zero-height FloatingLayout. The landmark window has no overlays,
+-- the preview simply disappears there.
 --
 -- The preview sits in a FloatingLayout together with overlay widgets (cockpit
 -- button, speed, specialisation icons). Swapping only the preview node left
@@ -29,7 +31,7 @@
 -- .script.lua files must export via function data().
 
 function data()
-	local VERSION = "0.5.1"
+	local VERSION = "0.6.0"
 
 	local react = ug_require "::/gui/main/react.lua"
 	local builtin = ug_require "::/gui/main/builtin.lua"
@@ -37,7 +39,7 @@ function data()
 	local EVENT = "kampfmoehre_preview_toggle_changed"
 	local LABEL_KEY = "3D preview" -- translated via strings.json
 
-	-- Shared on/off state for all vehicle windows (session only).
+	-- Shared on/off state for all toggled windows (session only).
 	local previewEnabled = true
 
 	-- Node ids from the current render pass, used to find the preview's layout.
@@ -52,12 +54,25 @@ function data()
 		return (select(n, ...))
 	end
 
-	-- Windows whose preview is toggled: transport vehicles and persons (whose
-	-- window shows their private car while they drive).
-	local function isVehicle(entity)
+	-- Recipe id of the landmark window content, resolved on first use. The
+	-- landmark preview is not tied to a component we could check cheaply, so it
+	-- is recognised by the recipe that calls the renderer.
+	local perkRecipeId = nil
+	local function isPerkWindow()
+		if perkRecipeId == nil then
+			local ok, recipe = pcall(ug_require, "::/gui/entity_window/perk/perk.tl")
+			perkRecipeId = ok and react.GetRecipeId(recipe) or false
+		end
+		return perkRecipeId ~= false and react.getCurrentRecipeId() == perkRecipeId
+	end
+
+	-- Windows whose preview is toggled: transport vehicles, persons (whose
+	-- window shows their private car while they drive) and landmarks.
+	local function isToggled(entity)
 		if entity == nil then
 			return false
 		end
+		if isPerkWindow() then return true end
 		local ok, tv = pcall(api.engine.getComponent, entity, api.type.ComponentType.TRANSPORT_VEHICLE)
 		if ok and tv ~= nil then return true end
 		local okP, sp = pcall(api.engine.getComponent, entity, api.type.ComponentType.SIM_PERSON)
@@ -72,8 +87,8 @@ function data()
 
 		builtin.EntityRendererComponent = function(...)
 			local params = lastArg(...)
-			if type(params) == "table" and isVehicle(params.entity) then
-				-- We are inside the hosting recipe (vehicle.tl) here, so react hooks
+			if type(params) == "table" and isToggled(params.entity) then
+				-- We are inside the hosting recipe (vehicle.tl, perk.tl) here, so react hooks
 				-- are legal and run once per render in a stable order: a state to
 				-- re-render the host when the toggle changes, and the event hook.
 				local state = react.useState(previewEnabled)
@@ -212,11 +227,11 @@ function data()
 			return builtin.BoxLayout{ children = {} }
 		end)
 
-	-- Checkbox row shown in every vehicle window (VehicleEowExtensionPoint).
+	-- Checkbox row shown in every vehicle, person and landmark window.
 	-- RegisterPluginRecipe only needs the extension point's id (and no
 	-- wrappedRecipe); discovery happens through the resource type string.
 	local function togglePluginFn(_params)
-			-- Re-render this row when the toggle changes in ANY vehicle window, and
+			-- Re-render this row when the toggle changes in ANY window, and
 			-- drive the checkbox from the shared state (controlled "value"), so all
 			-- open windows show the same state.
 			local state = react.useState(previewEnabled)
@@ -245,6 +260,8 @@ function data()
 		{ id = "::VehicleEowExtensionPoint" }, "KampfmoehrePreviewTogglePlugin", togglePluginFn)
 	preview_toggle.PersonTogglePlugin = react.RegisterPluginRecipe(
 		{ id = "::SimPersonEowExtensionPoint" }, "KampfmoehrePreviewTogglePersonPlugin", togglePluginFn)
+	preview_toggle.PerkTogglePlugin = react.RegisterPluginRecipe(
+		{ id = "::PerkEowExtensionPoint" }, "KampfmoehrePreviewTogglePerkPlugin", togglePluginFn)
 
 	return preview_toggle
 end
